@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# shell escape from stdin to stdout
+
+case $# in
+  0)
+	;;
+  *)
+	echo "Usage: $0" >&2
+	exit 2
+esac
+
+exec /usr/bin/awk -F' 	' \
+'/^@.*\\/ {
+ n = substr($0, 2, length() - 2)
+
+ printf("'\''")
+
+ l = 0
+ while ((getline <n) == 1) {
+  l++; s = -1; i = 1
+
+  if (substr($1, 1, 1) == "#") continue
+
+  { printf("%s", ""); for (c = substr($0, i++, 1); c != ""; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "") >"/dev/tty"; exit 2 }
+
+   if (c == "#") {
+    if (s != 0) {
+     print ""
+     break
+    }
+
+    printf("#")
+    continue
+   } else s = index(FS, c)
+
+
+   if (c == "\"") { printf("%s", "\""); for (c = substr($0, i++, 1); c != "\""; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "\"") >"/dev/tty"; exit 2 } if (c == "'\''") { printf("'\''\\'\'''\''"); continue } else if (c == "\\") { printf("\\"); c = substr($0, i++, 1); if (c == "'\''") { printf("'\''\\'\'''\''"); continue }; printf("%s", c); continue } else printf("%s", c) } printf("%s", "\"") }
+
+
+   else
+
+   if (c == "'\''") { printf("%s", "/"); for (c = substr($0, i++, 1); c != "'\''"; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "'\''") >"/dev/tty"; exit 2 } if (c == "'\''") { printf("'\''\\'\'''\''"); continue } else if (c == "\\") { printf("\\"); c = substr($0, i++, 1); if (c == "'\''") { printf("'\''\\'\'''\''"); continue }; printf("%s", c); continue } else printf("%s", c) } printf("%s", "/") }
+
+
+   else if (c == "/") {
+    c = substr($0, i++, 1)
+
+    if (c == "#")
+
+    { printf("%s", "'\''"); for (c = substr($0, i++, 1); c != ""; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "") >"/dev/tty"; exit 2 }
+
+    printf("%s", c)
+
+    } printf("%s", "'\''\\") }
+
+    else printf("/%s", c)
+   }
+
+   else printf("%s", c)
+
+
+  } printf("%s", "") }
+
+  print ""
+ }
+
+ print "'\'' \\"
+ next
+}
+
+{ print }
+' \
+
