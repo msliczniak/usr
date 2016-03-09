@@ -1,8 +1,4 @@
-#define	P	print
-BEGIN {
-v = /#"$k"
-",bar,baz"
-}
+#include "test1.h"
 '^XXX$' { P }
 END {
 	P "'"

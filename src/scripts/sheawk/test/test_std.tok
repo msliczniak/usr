@@ -1,45 +1,44 @@
 k=foo
 
-/usr/bin/awk \
-/usr/bin/awk \
+/usr/bin/awk
+\
 
-'
+'BEGIN
+{
 
-BEGIN {
-BEGIN {
-
-v = '"$k"'\
-v = '"$k"'\
-v = '"$k"'\
+v
+=
+'"$k"'\
 
 ",bar,baz"
 
 }
 
-/^XXX$/ { print }
-/^XXX$/ { print }
-/^XXX$/ { print }
-/^XXX$/ { print }
+'\
 
-END {
-END {
+'/^XXX$/
+{
+print
+}
 
- print "'\''"
- print "'\''"
+END
+{
 
- print "\'\''"
- print "\'\''"
+print
+"'\''"
 
- print "\""
- print "\""
+print
+"\'\''"
 
- print n
- print n
+print
+"\""
+
+print
+n
 
 }
 
-' \
-' \
+'\
 
- n=xyz
+n=xyz
 

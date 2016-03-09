@@ -54,7 +54,7 @@ ENDC(p)
 	printf("'")
 
 	l = 0	/* line number */
-	while ((getline <n) == 1) {
+	while ((r = (getline <n)) == 1) {
 		l++; s = -1; i = 1
 		DMSG(("%d: %s\n", l, $0))
 		if (substr($1, 1, 1) == "#") continue
@@ -110,7 +110,12 @@ ENDC(p)
 		print ""
 	}
 
-	print "' \\"
+	if (r == -1) {
+		printf("sheawk: %d: file read error: %s\n", l, n) >"/dev/tty"; \
+		exit 2 \
+	}
+
+	print "'\\"
 	next
 }
 
