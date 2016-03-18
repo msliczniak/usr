@@ -8,7 +8,7 @@ k=foo
 
 v
 =
-'"$k"'\
+'"\"$k\""'\
 
 ",bar,baz"
 
@@ -16,7 +16,9 @@ v
 
 '\
 
-'/^XXX$/
+'/^X
+\/
+\'\''X$/
 {
 print
 }
@@ -35,6 +37,18 @@ print
 
 print
 n
+
+print
+v
+
+
+
+print
+"?\?-"
+
+print
+"??-"
+
 
 }
 

@@ -32,7 +32,7 @@ $(PROG).ver : $(PROG).tok
 
 # generate output
 $(PROG).out : $(PROG) $(PROG).ver
-	echo XXX | /bin/sh $< >$@
+	echo "X  /	'X" | /bin/sh $< >$@
 
 clean : $(PROG).h $(PROG).sh $(PROG)_std.tok $(PROG)_std.out \
   $(PROG)0.h $(PROG)1.h

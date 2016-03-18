@@ -13,7 +13,7 @@ within a regex
 
 (cpp will not preprocess inside quotes)
 
-Use C /* */ style comments for awk
+Use C /* */ style comments for awk, do not use shell # or C++ // style comments
 
 # building
 
@@ -26,12 +26,14 @@ Use C /* */ style comments for awk
 # gotchas
 
   @file1\
+  
   @file2\
   
 
 glues files together, pass args instead:
 
   @file\
+  
    v=1
 
 cpp can change whitespace ouside of quotes
@@ -42,4 +44,12 @@ may fail if file is not - or does not end .h or .c
 
 /# does not check that quotes balance
 
-for '' regex you need to backslash escape ' and / (fix / ?)
+for '' regex you need to backslash escape '
+
+do not use trigraphs, inside '' slash escape each question mark, inside "" paste together "?" "?-", otherwise use CPP line continuation:
+
+  ?\
+  
+  ?-
+
+do not use $ in identifier

@@ -33,6 +33,12 @@ if (c == e) \
 FORC(e, p) \
 SESQ \
 \
+/* backslash escape character? */ \
+else if (c == p) { \
+	printf("\\%s", p); \
+	continue \
+} \
+\
 /* backslash escaped character? */ \
 else if (c == "\\") { \
 	printf("\\"); \
