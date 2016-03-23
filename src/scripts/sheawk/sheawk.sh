@@ -10,6 +10,10 @@ case $# in
 	exit 2
 esac
 
-exec /usr/bin/awk -F' 	' \
+# getline in solaris awk cannot read from another file
+AWK='/usr/bin/nawk'
+[ -x "$AWK" ] || AWK='/usr/bin/awk'
+
+exec "$AWK" -F' 	' \
 @sheawk.awk\
 

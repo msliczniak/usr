@@ -10,19 +10,23 @@ case $# in
 	exit 2
 esac
 
-exec /usr/bin/awk -F' 	' \
+# getline in solaris awk cannot read from another file
+AWK='/usr/bin/nawk'
+[ -x "$AWK" ] || AWK='/usr/bin/awk'
+
+exec "$AWK" -F' 	' \
 '/^@.*\\/ {
  n = substr($0, 2, length() - 2)
 
  printf("'\''")
 
  l = 0
- while ((getline <n) == 1) {
+ while ((r = (getline <n)) == 1) {
   l++; s = -1; i = 1
 
   if (substr($1, 1, 1) == "#") continue
 
-  { printf("%s", ""); for (c = substr($0, i++, 1); c != ""; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "") >"/dev/tty"; exit 2 }
+  { printf("%s", ""); for (c = substr($0, i++, 1); c != ""; c = substr($0, i++, 1)) { ; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "") >"/dev/tty"; exit 2 }
 
    if (c == "#") {
     if (s != 0) {
@@ -35,12 +39,12 @@ exec /usr/bin/awk -F' 	' \
    } else s = index(FS, c)
 
 
-   if (c == "\"") { printf("%s", "\""); for (c = substr($0, i++, 1); c != "\""; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "\"") >"/dev/tty"; exit 2 } if (c == "'\''") { printf("'\''\\'\'''\''"); continue } else if (c == "\\") { printf("\\"); c = substr($0, i++, 1); if (c == "'\''") { printf("'\''\\'\'''\''"); continue }; printf("%s", c); continue } else printf("%s", c) } printf("%s", "\"") }
+   if (c == "\"") { printf("%s", "\""); for (c = substr($0, i++, 1); c != "\""; c = substr($0, i++, 1)) { ; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "\"") >"/dev/tty"; exit 2 } if (c == "'\''") { printf("'\''\\'\'''\''"); continue } else if (c == "\"") { printf("\\%s", "\""); continue } else if (c == "\\") { printf("\\"); c = substr($0, i++, 1); if (c == "'\''") { printf("'\''\\'\'''\''"); continue }; printf("%s", c); continue } else printf("%s", c) } printf("%s", "\"") }
 
 
    else
 
-   if (c == "'\''") { printf("%s", "/"); for (c = substr($0, i++, 1); c != "'\''"; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "'\''") >"/dev/tty"; exit 2 } if (c == "'\''") { printf("'\''\\'\'''\''"); continue } else if (c == "\\") { printf("\\"); c = substr($0, i++, 1); if (c == "'\''") { printf("'\''\\'\'''\''"); continue }; printf("%s", c); continue } else printf("%s", c) } printf("%s", "/") }
+   if (c == "'\''") { printf("%s", "/"); for (c = substr($0, i++, 1); c != "'\''"; c = substr($0, i++, 1)) { ; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "'\''") >"/dev/tty"; exit 2 } if (c == "'\''") { printf("'\''\\'\'''\''"); continue } else if (c == "/") { printf("\\%s", "/"); continue } else if (c == "\\") { printf("\\"); c = substr($0, i++, 1); if (c == "'\''") { printf("'\''\\'\'''\''"); continue }; printf("%s", c); continue } else printf("%s", c) } printf("%s", "/") }
 
 
    else if (c == "/") {
@@ -48,7 +52,7 @@ exec /usr/bin/awk -F' 	' \
 
     if (c == "#")
 
-    { printf("%s", "'\''"); for (c = substr($0, i++, 1); c != ""; c = substr($0, i++, 1)) {; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "") >"/dev/tty"; exit 2 }
+    { printf("%s", "'\''"); for (c = substr($0, i++, 1); c != ""; c = substr($0, i++, 1)) { ; if (c == "") { printf("sheawk: %d: unmatched %c\n", l, "") >"/dev/tty"; exit 2 }
 
     printf("%s", c)
 
@@ -65,10 +69,15 @@ exec /usr/bin/awk -F' 	' \
   print ""
  }
 
- print "'\'' \\"
+ if (r == -1) {
+  printf("sheawk: %d: file read error: %s\n", l, n) >"/dev/tty"; exit 2 }
+
+
+
+ print "'\''\\"
  next
 }
 
 { print }
-' \
+'\
 
