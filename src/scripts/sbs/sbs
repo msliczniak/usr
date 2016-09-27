@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# losslessly convert 3d videos from 3DS to matroska for youtube
+# requires jpegtran with drop patch
+
+jpeg() {
+	"$HOME"/usr/droppatch/bin/cjpeg
+}
+
+drop() {
+	"$HOME"/usr/droppatch/bin/jpegtran -drop "$@"
+}
+
+usage() {
+	echo 'Usage: sbs HNI_file.AVI' >&2
+	exit 2
+}
+
+case $# in
+  1)
+	;;
+  *)
+	usage
+	;;
+esac
+
+n="`/usr/bin/basename "$1" .AVI`" || exit
+
+case "$n" in
+  HNI_[0123456789][0123456789][0123456789][0123456789])
+	;;
+  *)
+	usage
+	;;
+esac
+
+d=`/usr/bin/mktemp -d sbs-XXXXXX` || exit
+{ echo P6; echo 960 240; echo 255; /bin/cat /dev/zero; } | cjpeg >"$d"/f || exit
+/bin/mkdir "$d"'/l' "$d"'/r' || exit
+
+ffmpeg -hide_banner -i "$1" \
+  -map 0:v:0 -vcodec copy -bsf:v mjpeg2jpeg "$d"'/l/%d.jpg' \
+  -map 0:v:1 -vcodec copy -bsf:v mjpeg2jpeg "$d"'/r/%d.jpg' || exit
+
+cd "$d"/l || exit
+for i in *.jpg; do
+	drop +0+0 ./"$i" ../f | drop +480+0 ../r/"$i" >../$i || exit
+	/bin/rm -f ./"$i" ../r/"$i" || exit
+done
+
+cd ../.. || exit
+
+ffmpeg -hide_banner -framerate 20 -i "$d"'/%d.jpg' -i "$1" -c copy -aspect 2:1 \
+  -metadata stereo_mode=left_right "$n".MKV || exit
+
+/bin/rm -rf "$d"
