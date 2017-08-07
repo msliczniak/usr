@@ -1,0 +1,6 @@
+#!/usr/bin/sed -nf
+# take a twitter thread of the form below and make it text
+# 1) foo
+# 2) bar
+s/^ [1-9]\([0-9]*\)) /\
+/p
