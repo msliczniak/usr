@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# losslessly convert 3d images from 3DS to side-by-side jpeg
+# requires jpegtran with drop patch
+
+jpeg() {
+	"$HOME"/usr/droppatch/bin/cjpeg
+}
+
+drop() {
+	"$HOME"/usr/droppatch/bin/jpegtran -drop "$@"
+}
+
+ffm() {
+	AV_LOG_FORCE_NOCOLOR=1 ffmpeg -v 24 -hide_banner "$@"
+}
+
+usage() {
+	echo 'Usage: sbs HNI_file.MPO' >&2
+	exit 2
+}
+
+case $# in
+  1)
+	;;
+  *)
+	usage
+	;;
+esac
+
+n="`/usr/bin/basename "$1" .MPO`" || exit
+
+case "$n" in
+  HNI_[0123456789][0123456789][0123456789][0123456789])
+	;;
+  *)
+	usage
+	;;
+esac
+
+d=`/usr/bin/mktemp -d /tmp/mposbs-XXXXXX` || exit
+
+ffm -f jpeg_pipe -i "$1" -c copy -frames 2 "$d"'/p%d.jpg' || exit
+
+{ echo P6; echo 1280 480; echo 255; /bin/cat /dev/zero; } | \
+  cjpeg -sample 2x1 >"$d"/f || exit
+
+drop +0+0 "$d"/p1.jpg -copy NONE "$d"/f | \
+  drop +640+0 "$d"/p2.jpg -prog >"$n".JPG || exit
+
+/bin/rm -rf "$d"
